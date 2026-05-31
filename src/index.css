@@ -12,7 +12,6 @@ html, body, #root {
   margin: 0;
   background: #020617;
   color: #e2e8f0;
-  overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -60,4 +59,144 @@ html, body, #root {
 ::selection {
   background: rgba(245, 158, 11, 0.3);
   color: #e2e8f0;
+}
+
+/* ============================================
+   PRINT STYLESHEET — clean black-on-white PDF
+   ============================================ */
+@media print {
+  @page {
+    margin: 0.5in;
+    size: letter;
+  }
+
+  html, body, #root {
+    background: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide interactive elements */
+  .print\\:hidden,
+  header,
+  .maplibregl-control-container,
+  .maplibregl-ctrl-attrib,
+  [class*="sticky"],
+  [class*="fixed"] {
+    display: none !important;
+  }
+
+  /* Print header */
+  body::before {
+    content: "Backpacker's Almanac — Yosemite North Rim";
+    display: block;
+    font-family: 'Space Grotesk', 'DM Sans', sans-serif;
+    font-size: 18pt;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 4pt;
+    border-bottom: 2px solid #1a1a1a;
+    padding-bottom: 8pt;
+  }
+
+  body::after {
+    content: "Trip dates: June 1–6, 2026 · Party: Jimmy + Phil · Base camp: Yosemite Creek";
+    display: block;
+    font-size: 9pt;
+    color: #555;
+    margin-bottom: 16pt;
+  }
+
+  /* Dark backgrounds → white */
+  .bg-slate-950, .bg-slate-900, .bg-slate-900\\/90, .bg-slate-900\\/95,
+  .bg-slate-800\\/50, .bg-slate-800\\/20, .bg-slate-950,
+  [class*="bg-slate-9"], [class*="bg-slate-8"] {
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Dark borders → light gray */
+  [class*="border-slate-7"], [class*="border-slate-6"] {
+    border-color: #ddd !important;
+  }
+
+  /* Text colors → black/dark gray */
+  .text-slate-100, .text-slate-200, .text-slate-300 { color: #1a1a1a !important; }
+  .text-slate-400, .text-slate-500 { color: #444 !important; }
+  .text-slate-600 { color: #666 !important; }
+  .text-amber-400, .text-amber-500 { color: #b45309 !important; }
+  .text-amber-500\\/60, .text-amber-500\\/70, .text-amber-500\\/80 { color: #92400e !important; }
+  .text-green-400\\/80 { color: #166534 !important; }
+  .text-blue-400, .text-blue-400\\/70 { color: #1e40af !important; }
+  .text-red-400 { color: #b91c1c !important; }
+
+  /* Remove border highlights */
+  .border-amber-400\\/30, .border-amber-500\\/40, .border-amber-500\\/30,
+  .border-red-500\\/40, .border-orange-500\\/40, .border-yellow-500\\/40,
+  .border-blue-500\\/40, .border-green-900\\/30, .border-amber-900\\/30 {
+    border-color: #ccc !important;
+  }
+
+  /* Tab bar in print — show all panels */
+  .flex.bg-slate-900\\/95.border-b {
+    display: none !important;
+  }
+
+  /* Show ALL panels stacked, not just selected tab */
+  [class*="max-h-"] {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Expand collapsed panels */
+  .max-h-\\[45vh\\], .max-h-\\[50vh\\], .max-h-\\[60vh\\] {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Map area collapses to save paper */
+  .h-\\[38vh\\], .h-\\[40vh\\], .md\\:h-\\[45vh\\], .md\\:h-\\[50vh\\] {
+    height: auto !important;
+    display: none !important;
+  }
+
+  /* Elevation profile — keep chart */
+  .recharts-wrapper svg {
+    max-width: 100% !important;
+  }
+
+  /* Badge colors */
+  .bg-red-500\\/15 { background: #fecaca !important; }
+  .bg-blue-500\\/15 { background: #bfdbfe !important; }
+  .bg-purple-500\\/15 { background: #e9d5ff !important; }
+
+  /* Gradient backgrounds → solid */
+  .bg-gradient-to-b {
+    background: #ffffff !important;
+  }
+
+  /* Attribution → subtle */
+  footer {
+    font-size: 7pt !important;
+    color: #999 !important;
+    border-color: #ddd !important;
+    margin-top: 12pt !important;
+    padding-top: 8pt !important;
+  }
+
+  footer span {
+    color: #999 !important;
+  }
+
+  /* Page breaks */
+  h3 {
+    page-break-after: avoid;
+  }
+
+  .recharts-wrapper {
+    page-break-inside: avoid;
+  }
 }

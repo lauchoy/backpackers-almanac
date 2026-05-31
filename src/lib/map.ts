@@ -28,6 +28,7 @@ export function createMap(container: string | HTMLElement, center: [number, numb
     zoom,
     pitch: 55,
     bearing: -20,
+    cooperativeGestures: true,
     style: {
       version: 8,
       sources: {

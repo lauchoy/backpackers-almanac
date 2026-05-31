@@ -20,6 +20,12 @@ export default function MapView({ selectedDay, mapRef }: MapViewProps) {
     const map = createMap(containerRef.current, TRIP_CENTER, TRIP_ZOOM);
     mapRef.current = map;
 
+    // ResizeObserver: keep map rendering correctly when container size changes
+    const resizeObserver = new ResizeObserver(() => {
+      map.resize();
+    });
+    resizeObserver.observe(containerRef.current);
+
     map.on('load', () => {
       // Add route lines for each day
       TRIP_DAYS.filter((d) => d.anchors.length >= 2).forEach((day) => {
@@ -100,6 +106,7 @@ export default function MapView({ selectedDay, mapRef }: MapViewProps) {
     });
 
     return () => {
+      resizeObserver.disconnect();
       map.remove();
       mapRef.current = null;
     };
@@ -132,7 +139,7 @@ export default function MapView({ selectedDay, mapRef }: MapViewProps) {
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0 w-full h-full"
+      className="w-full h-full"
       style={{ touchAction: 'manipulation' }}
     />
   );

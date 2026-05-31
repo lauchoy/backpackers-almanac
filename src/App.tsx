@@ -1,5 +1,5 @@
 // App root — BUILD-SPEC §4, §6
-// Mobile-first topographic field instrument
+// Mobile-first topographic field instrument — scrollable page layout
 
 import { useState, useRef, useCallback } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -12,6 +12,8 @@ import WindDial from './components/WindDial';
 import InfoCenter from './components/InfoCenter';
 import CampConditions from './components/CampConditions';
 import PackingList from './components/PackingList';
+import OfflineBanner from './components/OfflineBanner';
+import { downloadTripBrief } from './lib/exportHtml';
 import { TRIP_DAYS, TRIP_META } from './data/itinerary';
 import type { TripDay } from './data/itinerary';
 
@@ -35,11 +37,25 @@ function App() {
     queryClient.invalidateQueries();
   }, []);
 
+  const handlePrint = useCallback(() => {
+    window.print();
+  }, []);
+
+  const handleDownload = useCallback(async () => {
+    // Query packing items from Dexie
+    const { getAllItems } = await import('./store/packingDb');
+    const packingItems = await getAllItems();
+    downloadTripBrief({ packingItems });
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="h-dvh w-full flex flex-col bg-slate-950 text-slate-100 overflow-hidden font-sans">
+      <div className="min-h-dvh w-full bg-slate-950 text-slate-100 font-sans">
+        {/* Offline banner */}
+        <OfflineBanner />
+
         {/* Top Bar */}
-        <header className="flex-shrink-0 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50 px-3 py-2 flex items-center justify-between z-10">
+        <header className="sticky top-0 z-20 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50 px-3 py-2 flex items-center justify-between">
           <div>
             <h1 className="text-sm font-bold tracking-tight text-slate-100">
               {TRIP_META.name}
@@ -48,16 +64,33 @@ function App() {
               {TRIP_META.dates} · {TRIP_META.model}
             </p>
           </div>
-          <button
-            onClick={handleRefresh}
-            className="text-[10px] text-amber-400 hover:text-amber-300 transition-colors px-3 py-1 rounded-lg border border-amber-400/30 hover:border-amber-400/60"
-          >
-            ↻ Refresh
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleRefresh}
+              className="text-[10px] text-amber-400 hover:text-amber-300 transition-colors px-2 py-1 rounded-lg border border-amber-400/30 hover:border-amber-400/60"
+              title="Refresh weather & alerts"
+            >
+              ↻
+            </button>
+            <button
+              onClick={handleDownload}
+              className="text-[10px] text-amber-400 hover:text-amber-300 transition-colors px-2 py-1 rounded-lg border border-amber-400/30 hover:border-amber-400/60 print:hidden"
+              title="Download trip brief (HTML file)"
+            >
+              ↓
+            </button>
+            <button
+              onClick={handlePrint}
+              className="text-[10px] text-slate-400 hover:text-slate-200 transition-colors px-2 py-1 rounded-lg border border-slate-600/30 hover:border-slate-500/50 print:hidden"
+              title="Print / Save as PDF"
+            >
+              ⎙
+            </button>
+          </div>
         </header>
 
-        {/* Map */}
-        <div className="flex-1 relative min-h-0">
+        {/* Map section */}
+        <div className="h-[38vh] md:h-[45vh] relative flex-shrink-0">
           <MapView selectedDay={selectedDay} mapRef={mapRef} />
 
           {/* Day selector overlay */}
@@ -69,13 +102,14 @@ function App() {
         {/* Elevation profile */}
         <ElevationProfile day={selectedDay} />
 
-        {/* Data panels — tabbed */}
-        <div className="flex-shrink-0">
-          <CampConditions />
-          <WindDial />
+        {/* Camp conditions + Wind */}
+        <CampConditions />
+        <WindDial />
 
+        {/* Data panels — tabbed */}
+        <div>
           {/* Tab bar */}
-          <div className="flex bg-slate-900/95 border-b border-slate-700/50">
+          <div className="flex bg-slate-900/95 border-b border-slate-700/50 sticky top-[41px] z-10">
             {([
               ['weather', 'Weather'],
               ['info', 'Info Center'],
@@ -96,7 +130,7 @@ function App() {
           </div>
 
           {/* Panel content */}
-          <div className="flex-shrink-0 max-h-[45vh] overflow-y-auto">
+          <div className="max-h-none overflow-visible">
             {activePanel === 'weather' && <WeatherCard onRefresh={handleRefresh} />}
             {activePanel === 'info' && <InfoCenter />}
             {activePanel === 'packing' && <PackingList />}
@@ -104,7 +138,7 @@ function App() {
         </div>
 
         {/* Attribution bar */}
-        <footer className="flex-shrink-0 bg-slate-900/95 border-t border-slate-700/50 px-3 py-1 flex items-center justify-between text-[8px] text-slate-600">
+        <footer className="bg-slate-900/95 border-t border-slate-700/50 px-3 py-1 flex items-center justify-between text-[8px] text-slate-600">
           <span>Protomaps © OSM · Open-Meteo CC BY 4.0 · NWS · NPS</span>
           <span>map data approximate — drop GPX</span>
         </footer>
