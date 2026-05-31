@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'DM Sans', 'Public Sans', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', 'DM Sans', sans-serif;
+}
+
+/* Topographic field instrument aesthetic — BUILD-SPEC §6 */
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  background: #020617;
+  color: #e2e8f0;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 2px;
+}
+
+/* MapLibre overrides */
+.maplibregl-popup-content {
+  background: #1e293b !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px !important;
+  font-size: 11px !important;
+  font-family: 'DM Sans', sans-serif !important;
+  padding: 8px 10px !important;
+}
+.maplibregl-popup-tip {
+  border-top-color: #1e293b !important;
+}
+.maplibregl-ctrl-attrib {
+  background: rgba(15, 23, 42, 0.8) !important;
+  color: #475569 !important;
+  font-size: 8px !important;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* Selection accent */
+::selection {
+  background: rgba(245, 158, 11, 0.3);
+  color: #e2e8f0;
+}
