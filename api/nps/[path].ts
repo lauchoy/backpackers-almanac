@@ -17,13 +17,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(204).end();
   }
 
-  // Build NPS URL from the path after /api/nps
-  const npsPath = (req.url || '').replace(/^\/api\/nps\/?/, '');
+  // Build NPS URL from the catch-all path parameter
+  const npsPath = Array.isArray(req.query.path) 
+    ? (req.query.path as string[]).join('/') 
+    : (req.query.path as string) || '';
   const url = new URL(`${NPS_BASE}/${npsPath}`);
 
-  // Forward all query params
+  // Forward remaining query params (exclude the catch-all 'path')
   for (const [key, value] of Object.entries(req.query)) {
-    if (typeof value === 'string') {
+    if (key !== 'path' && typeof value === 'string') {
       url.searchParams.set(key, value);
     }
   }
