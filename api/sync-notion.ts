@@ -5,8 +5,30 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const NOTION_TOKEN = process.env.NOTION_API_KEY || '';
 const NOTION_PAGE_ID = '3727f694-dbe1-81ac-998e-ef5b6f87f2dd';
-const CAMP_COORD = { lat: 37.76, lon: -119.595 };
+const CAMP_COORD = { lat: 37.83175, lon: -119.58938 };
 const APP_USER_AGENT = 'Backpackers-Almanac/1.0';
+
+async function fetchNwsForecast(): Promise<string> {
+  // Step 1: get gridpoint
+  const pointRes = await fetch(
+    `https://api.weather.gov/points/${CAMP_COORD.lat},${CAMP_COORD.lon}`,
+    { headers: { 'User-Agent': APP_USER_AGENT } }
+  );
+  if (!pointRes.ok) return 'NWS unavailable';
+  const pointData = await pointRes.json() as Record<string, any>;
+  const fcUrl = pointData.properties?.forecast;
+  if (!fcUrl) return 'No forecast URL';
+
+  // Step 2: get forecast
+  const fcRes = await fetch(fcUrl, { headers: { 'User-Agent': APP_USER_AGENT } });
+  if (!fcRes.ok) return 'Forecast unavailable';
+  const fc = await fcRes.json() as Record<string, any>;
+  const periods = fc.properties?.periods || [];
+
+  return periods.slice(0, 4).map((p: any) =>
+    `${p.name}: ${p.temperature}°F, ${p.shortForecast}${p.windSpeed ? `, wind ${p.windSpeed} ${p.windDirection || ''}` : ''}`
+  ).join(' · ');
+}
 
 async function fetchOpenMeteo(): Promise<string> {
   const params = new URLSearchParams({
@@ -102,8 +124,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   
   try {
-    const [weather, alerts] = await Promise.all([
-      fetchOpenMeteo(),
+    const [nwsForecast, alerts] = await Promise.all([
+      fetchNwsForecast(),
       fetchNpsAlerts(),
     ]);
     
@@ -114,14 +136,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       hour: 'numeric', minute: '2-digit',
     });
     
-    const markdown = `\n---\n\n🔄 **Synced ${ts} PT**\n\n🌤️ ${weather}\n\n⚠️ ${alerts}\n`;
+    const markdown = `\n---\n\n🔄 **Synced ${ts} PT**\n\n🌤️ ${nwsForecast}\n\n⚠️ ${alerts}\n`;
     
     const ok = await patchNotion(markdown);
     
     res.status(ok ? 200 : 500).json({
       ok,
       timestamp: now.toISOString(),
-      weather,
+      forecast: nwsForecast,
       alerts,
     });
   } catch (err: any) {

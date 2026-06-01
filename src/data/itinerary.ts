@@ -45,8 +45,8 @@ export const ANCHORS: Record<string, Anchor> = {
     id: 'yosemiteCreekCamp',
     type: 'camp',
     label: 'Yosemite Creek camp (wilderness — NOT the Tioga campground)',
-    lat: 37.760,
-    lon: -119.5950,
+    lat: 37.83175,
+    lon: -119.58938,
     ele_ft: 6700,
   },
   eaglePeak: {
