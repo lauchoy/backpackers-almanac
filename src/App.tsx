@@ -48,6 +48,14 @@ function App() {
     downloadTripBrief({ packingItems });
   }, []);
 
+  const handleSyncNotion = useCallback(async () => {
+    try {
+      await fetch('/api/sync-notion', { method: 'POST' });
+    } catch {}
+  }, []);
+
+  const [syncing, setSyncing] = useState(false);
+
   return (
     <QueryClientProvider client={queryClient}>
       <div className="h-dvh w-full bg-slate-950 text-slate-100 font-sans flex flex-col overflow-hidden print:h-auto print:overflow-visible print:bg-white print:text-black">
@@ -71,6 +79,7 @@ function App() {
                 </div>
                 <div className="flex items-center gap-1">
                   <button onClick={handleRefresh} className="text-[10px] text-amber-400 bg-slate-950/60 backdrop-blur-sm px-2 py-1 rounded-lg border border-amber-400/30 active:bg-amber-500/20" title="Refresh">↻</button>
+                  <button onClick={() => { setSyncing(true); handleSyncNotion().finally(() => setSyncing(false)); }} className={`text-[10px] bg-slate-950/60 backdrop-blur-sm px-2 py-1 rounded-lg border active:bg-amber-500/20 ${syncing ? 'text-amber-400 border-amber-400/60 animate-pulse' : 'text-slate-400 border-slate-600/30'}`} title="Sync to Notion">⟳</button>
                   <button onClick={handleDownload} className="text-[10px] text-amber-400 bg-slate-950/60 backdrop-blur-sm px-2 py-1 rounded-lg border border-amber-400/30 active:bg-amber-500/20 print:hidden" title="Download">↓</button>
                   <button onClick={handlePrint} className="text-[10px] text-slate-400 bg-slate-950/60 backdrop-blur-sm px-2 py-1 rounded-lg border border-slate-600/30 active:bg-slate-700/50 print:hidden" title="Print">⎙</button>
                 </div>
